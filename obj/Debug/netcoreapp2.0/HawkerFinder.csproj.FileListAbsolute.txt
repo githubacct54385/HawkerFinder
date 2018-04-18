@@ -1,0 +1,10 @@
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/bin/Debug/netcoreapp2.0/HawkerFinder.deps.json
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/bin/Debug/netcoreapp2.0/HawkerFinder.runtimeconfig.json
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/bin/Debug/netcoreapp2.0/HawkerFinder.runtimeconfig.dev.json
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/bin/Debug/netcoreapp2.0/HawkerFinder.dll
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/bin/Debug/netcoreapp2.0/HawkerFinder.pdb
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/obj/Debug/netcoreapp2.0/HawkerFinder.csproj.CoreCompileInputs.cache
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/obj/Debug/netcoreapp2.0/HawkerFinder.AssemblyInfoInputs.cache
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/obj/Debug/netcoreapp2.0/HawkerFinder.AssemblyInfo.cs
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/obj/Debug/netcoreapp2.0/HawkerFinder.dll
+/Users/alex/Documents/C#/HawkerFinder/HawkerFinder/obj/Debug/netcoreapp2.0/HawkerFinder.pdb
