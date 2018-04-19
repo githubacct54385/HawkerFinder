@@ -4,11 +4,26 @@
     ViewData["Title"] = "Index";
 }
 
-<h2>Index</h2>
+<h2>All Hawker Centres</h2>
 
-<ul>
-    <li><a asp-area="" asp-controller="Address" asp-action="CloseHawkers">CloseHawkers</a></li>
-</ul>
+<form action="/Address/CloseHawkers" method="POST">
+  <fieldset>
+      <legend>Find closest Hawkers to a coordinate</legend>
+      <div>
+          <label for="Latitude">Latitude</label>
+          <input type="number" name="givenLatitude" step="0.01" placeholder=1.30 />
+      </div>
+      <div>
+          <label for="Longitude">Longitude</label>
+          <input type="number" name="givenLongitude" step="0.01" placeholder=103.00 />
+          
+      </div>
+      <div>
+          <label>&nbsp;</label>
+          <input type="submit" value="Submit" class="submit" />
+      </div>
+  </fieldset>
+</form>
 
 <table class="table">
     <thead>

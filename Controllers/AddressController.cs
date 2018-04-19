@@ -14,33 +14,39 @@ namespace HawkerFinder.Controllers {
   public class AddressController : Controller {
     private readonly HawkerContext _context;
 
-    private const string closestHawkersQuery =
+    private const string closestHawkersTemplateQuery =
       @"declare @mylat fLOAT, @mylong FLOAT
-        Select @mylat = 1.297796, @mylong = 103.766223
+        Select @mylat = {0}, @mylong = {1}
         SELECT top 5 ABS(dbo.DictanceKM(@mylat, Address.latitude, @mylong, Address.longitude)) DistanceKm, * from Address
         ORDER BY ABS(dbo.DictanceKM(@mylat, Address.latitude, @mylong, Address.longitude)) ";
+        
     public AddressController (HawkerContext context) {
       _context = context;
     }
+
+    [HttpGet]
     public async Task<IActionResult> Index () {
       return View (await _context.Addresses.ToListAsync ());
     }
 
     // returns some of the closest hawker centres to a given coordinate
-    public IActionResult CloseHawkers () {
+    [HttpPost]
+    public IActionResult CloseHawkers (double givenLatitude, double givenLongitude) {
       // run query
-      Address[] closestAddresses = GetClosestAddrs ();
+      Address[] closestAddresses = GetClosestAddrs (givenLatitude, givenLongitude);
       // return results
       return View (closestAddresses);
     }
 
-    private Address[] GetClosestAddrs () {
+    private Address[] GetClosestAddrs (double givenLatitude, double givenLongitude) {
       // only return up to five addresses
       Address[] closestAddresses = new Address[5];
       int index = 0;
       using (SqlConnection conn =
         new SqlConnection (_context.Database.GetDbConnection ().ConnectionString)) {
         conn.Open ();
+        string closestHawkersQuery = 
+          string.Format (closestHawkersTemplateQuery, givenLatitude, givenLongitude);
         using (SqlCommand cmd = new SqlCommand (closestHawkersQuery, conn)) {
           using (SqlDataReader dr = cmd.ExecuteReader ()) {
             while (dr.Read () && index < 5) {
