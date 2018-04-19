@@ -33,16 +33,16 @@ namespace HawkerFinder.Controllers {
     [HttpPost]
     public IActionResult CloseHawkers (double givenLatitude, double givenLongitude) {
       // run query
-      Address[] closestAddresses = GetClosestAddrs (givenLatitude, givenLongitude);
+      Distance[] closestAddresses = GetClosestAddrs (givenLatitude, givenLongitude);
       // return results
-      var addrs = new List<Address> ();
-      addrs.AddRange (closestAddresses);
-      return View (addrs);
+      var dists = new List<Distance> ();
+      dists.AddRange (closestAddresses);
+      return View (dists);
     }
 
-    private Address[] GetClosestAddrs (double givenLatitude, double givenLongitude) {
+    private Distance[] GetClosestAddrs (double givenLatitude, double givenLongitude) {
       // only return up to five addresses
-      Address[] closestAddresses = new Address[5];
+      Distance[] closestAddresses = new Distance[5];
       int index = 0;
       using (SqlConnection conn =
         new SqlConnection (_context.Database.GetDbConnection ().ConnectionString)) {
@@ -58,14 +58,15 @@ namespace HawkerFinder.Controllers {
               string locationName = dr.GetString (3);
               double latitude = dr.GetDouble (4);
               double longitude = dr.GetDouble (5);
-              Address addr = new Address {
+              Distance distance = new Distance {
                 Id = id,
                 Name = locationName,
                 Addr = address,
                 latitude = latitude,
-                longitude = longitude
+                longitude = longitude,
+                distance = dist
               };
-              closestAddresses[index++] = addr;
+              closestAddresses[index++] = distance;
             }
           }
         }

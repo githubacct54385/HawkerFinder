@@ -9,6 +9,14 @@
 <form action="/Address/CloseHawkers" method="POST">
   <fieldset>
       <legend>Find closest Hawkers to a coordinate</legend>
+      <div id="rdo_btns">
+        <label>By Location
+            <input type="radio" checked="checked" name="radio" id="byLocationRdo">
+        </label>
+        <label>By Coordinates
+            <input type="radio" name="radio" id="byCoordsRdo">
+        </label>
+      </div>
       <div>
           <label for="Latitude">Latitude</label>
           <input type="number" name="givenLatitude" step="0.01" placeholder=1.30 />
@@ -67,3 +75,25 @@
 }
     </tbody>
 </table>
+
+<script>
+    $(document).ready(function(){
+        alert("Hello World!");
+        /*$('#rdo_btns').click(function() {
+            if($('#byLocationRdo').is(':checked')) { 
+                alert("it's checked"); 
+            }
+            else if($('#byCoordsRdo').is(':checked')) { 
+                alert("it's checked"); 
+            }
+        });*/
+
+        $(function(){
+            $('input[type="radio"]').click(function(){
+                if ($(this).is(':checked')) {
+                    alert($(this).val());
+                }
+            });
+        });
+    }
+</script>

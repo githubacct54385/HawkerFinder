@@ -1,4 +1,4 @@
-@model IEnumerable<HawkerFinder.Models.Address>
+@model IEnumerable<HawkerFinder.Models.Distance>
 
 @{
     ViewData["Title"] = "Close Hawkers";
@@ -9,6 +9,9 @@
 <table class="table">
     <thead>
         <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.distance)
+            </th>
             <th>
                 @Html.DisplayNameFor(model => model.Id)
             </th>
@@ -30,6 +33,9 @@
     <tbody>
         @foreach(var item in Model) {
             <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.distance)
+                </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Id)
                 </td>
