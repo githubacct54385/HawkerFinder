@@ -19,7 +19,7 @@ namespace HawkerFinder.Controllers {
         Select @mylat = {0}, @mylong = {1}
         SELECT top 5 ABS(dbo.DictanceKM(@mylat, Address.latitude, @mylong, Address.longitude)) DistanceKm, * from Address
         ORDER BY ABS(dbo.DictanceKM(@mylat, Address.latitude, @mylong, Address.longitude)) ";
-        
+
     public AddressController (HawkerContext context) {
       _context = context;
     }
@@ -35,7 +35,9 @@ namespace HawkerFinder.Controllers {
       // run query
       Address[] closestAddresses = GetClosestAddrs (givenLatitude, givenLongitude);
       // return results
-      return View (closestAddresses);
+      var addrs = new List<Address> ();
+      addrs.AddRange (closestAddresses);
+      return View (addrs);
     }
 
     private Address[] GetClosestAddrs (double givenLatitude, double givenLongitude) {
@@ -45,7 +47,7 @@ namespace HawkerFinder.Controllers {
       using (SqlConnection conn =
         new SqlConnection (_context.Database.GetDbConnection ().ConnectionString)) {
         conn.Open ();
-        string closestHawkersQuery = 
+        string closestHawkersQuery =
           string.Format (closestHawkersTemplateQuery, givenLatitude, givenLongitude);
         using (SqlCommand cmd = new SqlCommand (closestHawkersQuery, conn)) {
           using (SqlDataReader dr = cmd.ExecuteReader ()) {
