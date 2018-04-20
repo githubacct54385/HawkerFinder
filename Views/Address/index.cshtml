@@ -2,21 +2,11 @@
     ViewData["Title"] = "Index";
 }
 
-<a asp-area="" asp-controller="Address" asp-action="SeeAll">View all Hawker Centres</a>
-
-<div class="jumbotron jumbotron-fluid">
+<div class="jumbotron jumbotron-fluid jumbo-bg" >
+  <div class="bg-img"></div>
   <div class="container">
     <h1 class="display-4">Find closest Hawkers</h1>
-    <p class="lead">Simply input a location or your x-y coordinates</p>
-  </div>
-
-  <div class="btn-group btn-group-toggle" data-toggle="buttons">
-    <label class="btn btn-secondary active">
-      <input type="radio" name="options" id="option1" autocomplete="off" checked> By Coordinates
-    </label>
-    <label class="btn btn-secondary">
-      <input type="radio" name="options" id="option2" autocomplete="off"> By Location
-    </label>
+    <p class="lead">Simply input your x-y coordinates</p>
   </div>
 
   <div class="container">
