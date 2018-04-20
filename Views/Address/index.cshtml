@@ -2,30 +2,66 @@
     ViewData["Title"] = "Index";
 }
 
+<script>
+  var geocoder;
+  function initialize() {
+    geocoder = new google.maps.Geocoder();
+  }
+
+  function codeAddress() {
+    var address = document.getElementById('address').value;
+    geocoder.geocode( { 'address': address}, function(results, status) {
+      if (status == 'OK') {
+        postToServer(results[0].geometry.location);
+      } else {
+        alert('Geocode was not successful for the following reason: ' + status);
+      }
+    });
+  }
+
+  function postToServer(coordinates) {
+    var xhttp = new XMLHttpRequest();
+    xhttp.onreadystatechange = function() {
+    if (this.readyState == 4 && this.status == 200) {
+      document.getElementById("demo").innerHTML = this.responseText;
+    }
+  };
+    xhttp.open("POST", "/Address/CloseHawkers", true);
+    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    var params = new String("givenCoordinates=");
+    params = params.concat(coordinates);
+    xhttp.send(params);
+  }
+
+</script>
+
 <div class="jumbotron jumbotron-fluid jumbo-bg" >
   <div class="bg-img"></div>
   <div class="container">
-    <h1 class="display-4">Find closest Hawkers</h1>
+    <h1 class="display-4">Hungry? Find closest Hawkers</h1>
     <p class="lead">Simply input your x-y coordinates</p>
   </div>
 
   <div class="container">
-    <form action="/Address/CloseHawkers" method="POST">
+    <!--action="/Address/CloseHawkers"-->
+    <form id="hawkerSearchForm">
       <div class="form-row">
-        <div class="col-sm-6">
-          <label for="givenLatitude">Latitude</label>
-          <input class="form-control" type="number" name="givenLatitude" step=0.10 value=1.30 >
+        <div class="col-sm-12">
+          <label for="address">Address</label>
+          <input id="address" placeholder="Raffles Place" class="form-control" type="text" onsubmit="codeAddress()" >
         </div>
-        <div class="col-sm-6">
-          <label for="givenLongitude">Longitude</label>
-          <input class="form-control" type="number" name="givenLongitude" step=0.10 value=103.00>
-        </div>
-      </div>
       <div class="form-row">
         <div class="col-sm-2">
-          <input type="submit" class="form-control btn btn-primary" value="Submit">
+          <input type="button" class="form-control btn btn-primary" value="Submit" onclick="codeAddress()">
         </div>
       </div>
     </form>
   </div>
+  <div>
+    <!--<input id="address" type="textbox" value="Sydney, NSW">
+    <input type="button" value="Encode" onclick="codeAddress()">-->
+    <p id="demo"></p>
+  </div>
 </div>
+
+  

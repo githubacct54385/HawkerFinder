@@ -36,13 +36,31 @@ namespace HawkerFinder.Controllers {
 
     // returns some of the closest hawker centres to a given coordinate
     [HttpPost]
-    public IActionResult CloseHawkers (double givenLatitude, double givenLongitude) {
-      // run query
-      Distance[] closestAddresses = GetClosestAddrs (givenLatitude, givenLongitude);
-      // return results
-      var dists = new List<Distance> ();
-      dists.AddRange (closestAddresses);
-      return View (dists);
+    public IActionResult CloseHawkers (string givenCoordinates) {
+      try
+      {
+        string[] split = givenCoordinates.Split(',');
+        if(split.Length != 2) {
+          throw new Exception("Coordinates are not in the correct format.");
+        }
+        char[] removeThese = new char[] {'(', ')'};
+        split[0] = split[0].Trim(removeThese);
+        split[1] = split[1].Trim(removeThese);
+        double latitude = Double.Parse(split[0]);
+        double longitude = Double.Parse(split[1]);
+        // run query
+        Distance[] closestAddresses = GetClosestAddrs (latitude, longitude);
+        // return results
+        var dists = new List<Distance> ();
+        dists.AddRange (closestAddresses);
+        return View (dists);
+      }
+      catch (System.Exception ex)
+      {
+          Console.WriteLine("An exception occurred in AddressConteoller/CloseHawkers");
+          Console.WriteLine($"Exception text: {ex.Message}");
+          return View();
+      }
     }
 
     private Distance[] GetClosestAddrs (double givenLatitude, double givenLongitude) {
