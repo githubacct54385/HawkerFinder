@@ -25,7 +25,12 @@ namespace HawkerFinder.Controllers {
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index () {
+    public IActionResult Index () {
+      return View();
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> SeeAll () {
       return View (await _context.Addresses.ToListAsync ());
     }
 
