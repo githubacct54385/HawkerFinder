@@ -22,7 +22,7 @@ namespace HawkerFinder
                 var services = scope.ServiceProvider;
                 try {
                     var context = services.GetRequiredService<HawkerContext> ();
-                    DbInitializer.Initialize (context, args[1]);
+                    DbInitializer.Initialize (context, args[1], args[3]);
                 } catch (Exception ex) {
                     var logger = services.GetRequiredService<ILogger<Program>> ();
                     logger.LogError (ex, "An error occurred while seeding the database.");

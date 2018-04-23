@@ -2,7 +2,7 @@
     ViewData["Title"] = "Index";
 }
 
-<script>
+<!--<script>
   var geocoder;
   function initialize() {
     geocoder = new google.maps.Geocoder();
@@ -32,36 +32,32 @@
     params = params.concat(coordinates);
     xhttp.send(params);
   }
-
-</script>
+</script>-->
 
 <div class="jumbotron jumbotron-fluid jumbo-bg" >
   <div class="bg-img"></div>
   <div class="container">
     <h1 class="display-4">Hungry? Find closest Hawkers</h1>
-    <p class="lead">Simply input your x-y coordinates</p>
+    <p class="lead">Simply input your location</p>
   </div>
 
   <div class="container">
-    <!--action="/Address/CloseHawkers"-->
-    <form id="hawkerSearchForm">
+    <form action="/Address/CloseHawkersAsync" method="POST">
       <div class="form-row">
         <div class="col-sm-12">
           <label for="address">Address</label>
-          <input id="address" placeholder="Raffles Place" class="form-control" type="text" onsubmit="codeAddress()" >
+          <input class="form-control" type="text" name="address" placeholder="Raffles Place" >
         </div>
       <div class="form-row">
         <div class="col-sm-2">
-          <input type="button" class="form-control btn btn-primary" value="Submit" onclick="codeAddress()">
+          <input type="submit" class="form-control btn btn-primary" value="Submit">
         </div>
       </div>
     </form>
   </div>
-  <div>
-    <!--<input id="address" type="textbox" value="Sydney, NSW">
-    <input type="button" value="Encode" onclick="codeAddress()">-->
+  <!--<div>
     <p id="demo"></p>
-  </div>
+  </div>-->
 </div>
 
   

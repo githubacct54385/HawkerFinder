@@ -1,12 +1,28 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using HawkerFinder.Models;
 
 namespace HawkerFinder.Data {
   public static class DbInitializer {
-    public static void Initialize (HawkerContext context, string hawkerCentreDir) {
+    public static void Initialize (HawkerContext context, string hawkerCentreDir, string googleApiKey) {
       context.Database.EnsureCreated ();
+
+      // is the hawker centre path valid?
+      if(!File.Exists(hawkerCentreDir)) {
+        Exception ex = new Exception("Command Line argument for Hawker Centres CSV is invalid.  Please check it then try again.");
+        throw ex;
+      }
+
+      // check if google api key is valid
+      if(String.IsNullOrEmpty(googleApiKey)) {
+        Exception ex = new Exception("Command line argument for Google API key is invalid");
+        throw ex;
+      }
+
+      // assign the google API key in the context for use later
+      context.GoogleAPIKey = googleApiKey;
 
       // Look for any Addresss.
       if (context.Addresses.Any ()) {
@@ -16,7 +32,6 @@ namespace HawkerFinder.Data {
       // if not seeded, read from the HawkerCentres.csv file for all the addresses
       // and put them into the database
       Address[] addresses = ReadFieldsFromCSV (hawkerCentreDir);
-
       foreach (Address a in addresses) {
         context.Addresses.Add (a);
       }
@@ -47,10 +62,10 @@ namespace HawkerFinder.Data {
           words = line.Split (',');
           try {
             // get the lat and long vals
-            double latitude = words[3] == "" ? 0.0 : Double.Parse(words[3]);
-            double longitude = words[4] == "" ? 0.0 : Double.Parse(words[4]);
+            double latitude = words[3] == "" ? 0.0 : Double.Parse (words[3]);
+            double longitude = words[4] == "" ? 0.0 : Double.Parse (words[4]);
             // create the address
-            Address newAddress = new Address{Name=words[1], Addr=words[2], latitude=latitude, longitude=longitude};
+            Address newAddress = new Address { Name = words[1], Addr = words[2], latitude = latitude, longitude = longitude };
             addresses[iterator++] = newAddress;
           } catch (System.IndexOutOfRangeException e) {
             Console.WriteLine (e.ToString ());
