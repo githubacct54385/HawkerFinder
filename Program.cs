@@ -10,19 +10,15 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-namespace HawkerFinder
-{
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
+namespace HawkerFinder {
+    public class Program {
+        public static void Main (string[] args) {
             var host = BuildWebHost (args);
-
             using (var scope = host.Services.CreateScope ()) {
                 var services = scope.ServiceProvider;
                 try {
                     var context = services.GetRequiredService<HawkerContext> ();
-                    DbInitializer.Initialize (context, args[1], args[3]);
+                    DbInitializer.Initialize (context, args[1]);
                 } catch (Exception ex) {
                     var logger = services.GetRequiredService<ILogger<Program>> ();
                     logger.LogError (ex, "An error occurred while seeding the database.");
@@ -31,9 +27,9 @@ namespace HawkerFinder
             host.Run ();
         }
 
-        public static IWebHost BuildWebHost(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
-                .Build();
+        public static IWebHost BuildWebHost (string[] args) =>
+            WebHost.CreateDefaultBuilder (args)
+            .UseStartup<Startup> ()
+            .Build ();
     }
 }

@@ -2,6 +2,15 @@
   "version": 3,
   "targets": {
     ".NETCoreApp,Version=v2.0": {
+      "GoogleMapsApi/0.70.0": {
+        "type": "package",
+        "compile": {
+          "lib/net40/GoogleMapsApi.dll": {}
+        },
+        "runtime": {
+          "lib/net40/GoogleMapsApi.dll": {}
+        }
+      },
       "Libuv/1.10.0": {
         "type": "package",
         "dependencies": {
@@ -4654,6 +4663,16 @@
     }
   },
   "libraries": {
+    "GoogleMapsApi/0.70.0": {
+      "sha512": "1BaddmmXAzXGlZdQauSaf8MgFOG1xNvjshLBU0+uAXyT985eSfbzVvlZtHwes9nrgKVWM4nn1yK9xYo+PHoVMw==",
+      "type": "package",
+      "path": "googlemapsapi/0.70.0",
+      "files": [
+        "googlemapsapi.0.70.0.nupkg.sha512",
+        "googlemapsapi.nuspec",
+        "lib/net40/GoogleMapsApi.dll"
+      ]
+    },
     "Libuv/1.10.0": {
       "sha512": "GsCf4q+eyaI49rCPlgYxdxa1SQCysXFFdSJWdstrwxytg4+VPYLYrXD4AT2rjHVJ+UF7SSWX9CapWEYaU4ejVQ==",
       "type": "package",
@@ -12267,6 +12286,7 @@
   },
   "projectFileDependencyGroups": {
     ".NETCoreApp,Version=v2.0": [
+      "GoogleMapsApi >= 0.70.0",
       "Microsoft.AspNetCore.All >= 2.0.6",
       "Microsoft.NETCore.App >= 2.0.0",
       "Newtonsoft.Json >= 11.0.2"
@@ -12311,6 +12331,10 @@
     "frameworks": {
       "netcoreapp2.0": {
         "dependencies": {
+          "GoogleMapsApi": {
+            "target": "Package",
+            "version": "[0.70.0, )"
+          },
           "Microsoft.AspNetCore.All": {
             "target": "Package",
             "version": "[2.0.6, )"
@@ -12332,5 +12356,17 @@
         "warn": true
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'GoogleMapsApi 0.70.0' was restored using '.NETFramework,Version=v4.6.1' instead of the project target framework '.NETCoreApp,Version=v2.0'. This package may not be fully compatible with your project.",
+      "libraryId": "GoogleMapsApi",
+      "targetGraphs": [
+        ".NETCoreApp,Version=v2.0"
+      ]
+    }
+  ]
 }

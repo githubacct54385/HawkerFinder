@@ -1,7 +1,7 @@
 using System;
 
 namespace HawkerFinder.Models {
-    public class Distance {
+    public class HawkerDistance {
         public int Id { get; set; }
         public string Name { get; set; }
         public string Addr { get; set; }

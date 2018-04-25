@@ -1,4 +1,4 @@
-@model IEnumerable<HawkerFinder.Models.Distance>
+@model IEnumerable<HawkerFinder.Models.HawkerDistance>
 
 @{
     ViewData["Title"] = "Close Hawkers";
@@ -6,52 +6,41 @@
 
 <h2>Checkout these nearby places to eat</h2>
 
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.distance)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Id)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Addr)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.latitude)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.longitude)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach(var item in Model) {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.distance)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Id)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Addr)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.latitude)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.longitude)
-                </td>
-            </tr>
+@{
+    if(ViewBag.Exception != null) {
+        <h2>There was an error on the server:</h2>
+        <h4>@ViewBag.Exception</h4>
+    }
+}
+
+<div id="Map" style="width: 500px; height: 500px">
+</div>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyC6v5-2uaq_wusHDktM9ILcqIrlPtnZgEk"></script>
+    <script type="text/javascript">
+        var markers = @Html.Raw(ViewBag.Markers);
+        window.onload = function () {
+            var mapOptions = {
+                center: new google.maps.LatLng(markers[0].lat, markers[0].lng),
+                zoom: 12,
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+            var infoWindow = new google.maps.InfoWindow();
+            var map = new google.maps.Map(document.getElementById("Map"), mapOptions);
+            for (i = 0; i < markers.length; i++) {
+                var data = markers[i]
+                var myLatlng = new google.maps.LatLng(data.lat, data.lng);
+                var marker = new google.maps.Marker({
+                    position: myLatlng,
+                    map: map,
+                    title: data.title
+                });
+                (function (marker, data) {
+                    google.maps.event.addListener(marker, "click", function (e) {
+                        infoWindow.setContent(data.description);
+                        infoWindow.open(map, marker);
+                    });
+                })(marker, data);
+            }
         }
-    </tbody>
-</table>
+    </script>

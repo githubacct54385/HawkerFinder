@@ -3,18 +3,14 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web;
-using System.Xml.Linq;
+using GoogleMapsApi;
+using GoogleMapsApi.Entities.Geocoding.Request;
+using GoogleMapsApi.Entities.Geocoding.Response;
 using HawkerFinder.Data;
 using HawkerFinder.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 
 namespace HawkerFinder.Controllers {
   public class AddressController : Controller {
@@ -27,6 +23,7 @@ namespace HawkerFinder.Controllers {
         Address.longitude)) DistanceKm, * from Address
         ORDER BY ABS(dbo.DictanceKM(@mylat, Address.latitude, @mylong, 
         Address.longitude)) ";
+    private const string googleMapsAPIKey = "AIzaSyC6v5-2uaq_wusHDktM9ILcqIrlPtnZgEk";
 
     public AddressController (HawkerContext context) {
       _context = context;
@@ -44,93 +41,114 @@ namespace HawkerFinder.Controllers {
 
     // returns some of the closest hawker centres to a given coordinate
     [HttpPost]
-    public async Task<IActionResult> CloseHawkersAsync (string address) {
+    public IActionResult CloseHawkersAsync (string address) {
+      List<HawkerDistance> distances = new List<HawkerDistance> ();
+      string mapsMarkers = "";
       try {
-        // query Google Geocoding service on the server
-        LatLongPair pair = await GeocodeAddressAsync (address);
-        // use the coordinates to get the five closest hawker centres
-        List<Distance> dists = DistancesFromCoordinates (pair);
-        return View ("closehawkers", dists);
+        GeocodingResponse coordinates = GeocodeAddress (address);
+        CheckForCoordinatesErrors (coordinates);
+        distances = FiveClosestDistancesToCoordinates (coordinates);
+        mapsMarkers = CreateStringMarkers (distances);
+        bool noMarkersAvailable = String.IsNullOrEmpty (mapsMarkers);
+        if (noMarkersAvailable) {
+          return RedirectToAction ("Index");
+        }
+        ViewBag.Markers = mapsMarkers;
+        return View ("closehawkers");
       } catch (System.Exception ex) {
-        Console.WriteLine ("An exception occurred in AddressConteoller/CloseHawkers");
+        Console.WriteLine ("An exception occurred in AddressController/CloseHawkers");
         Console.WriteLine ($"Exception text: {ex.Message}");
+        ViewBag.Exception = ex.Message;
         return View ("closehawkers");
       }
     }
 
-    private async Task<LatLongPair> GeocodeAddressAsync (string address) {
-      string url = GoogleMapsAPIQuery (address);
-      using (var client = new HttpClient ()) {
-        var response = await client.GetAsync (url);
-        if (response.StatusCode == HttpStatusCode.OK) {
-          LatLongPair pair = ParseJSONResponse (response);
-          return pair;
-        } else {
-          Exception ex = new Exception ("HTTP call to Google Maps API returned non-OK status");
-          throw ex;
-        }
+    private static void CheckForCoordinatesErrors (GeocodingResponse coordinates) {
+      bool incorrectStatus = coordinates.Status != Status.OK;
+      if (incorrectStatus) {
+        throw new Exception ($"Cannot proceed - Geocoding Response gave invalid status: {coordinates.Status}");
+      }
+      bool wrongNumberOfCoordinates = coordinates.Results.Count () != 1;
+      if (wrongNumberOfCoordinates) {
+        throw new Exception ($"Cannot proceed - Geocoding Response gave incorrect number of coordinates.  Count: {coordinates.Results.Count()}");
       }
     }
 
-    private static LatLongPair ParseJSONResponse (HttpResponseMessage response) {
-      var content = response.Content.ReadAsStringAsync ();
-      JObject parsedJson = JObject.Parse (content.Result);
-      JToken firstResults = parsedJson["results"][0];
-      JToken loc = firstResults["geometry"]["location"];
-      JToken lat = loc["lat"];
-      JToken lng = loc["lng"];
-      LatLongPair pair = new LatLongPair (Double.Parse (lat.ToString ()),
-        Double.Parse (lng.ToString ()));
-      return pair;
+    private static GeocodingResponse GeocodeAddress (string address) {
+
+      var geocodingRequest = new GeocodingRequest {
+        ApiKey = googleMapsAPIKey,
+        Address = address
+      };
+      return GoogleMaps.Geocode.Query (geocodingRequest);
     }
 
-    private string GoogleMapsAPIQuery (string address) {
-      UriBuilder builder = new UriBuilder ("https://maps.googleapis.com/maps/api/geocode/json");
-      builder.Port = -1;
-      var query = HttpUtility.ParseQueryString (builder.Query);
-      query["address"] = address;
-      query["key"] = _context.GoogleAPIKey;
-      builder.Query = query.ToString ();
-      string url = builder.ToString ();
-      return url;
+    private string CreateStringMarkers (List<HawkerDistance> dists) {
+      try {
+        if (!dists.Any ()) {
+          throw new Exception ("No nearby Hawkers.  Unable to proceed");
+        }
+        string markers = "[";
+        foreach (var distance in dists) {
+          markers += "{";
+          markers += $"'title':'{distance.Name}',";
+          markers += $"'lat':'{distance.latitude}',";
+          markers += $"'lng':'{distance.longitude}',";
+          markers += $"'description':'{distance.Name}'";
+          markers += "},";
+        }
+        markers += "];";
+        return markers;
+      } catch (System.Exception ex) {
+        throw new Exception ($"An exception occurred in CreateStringMarkers().  The exception text says: {ex.Message}");
+      }
     }
 
-    private List<Distance> DistancesFromCoordinates (LatLongPair coordinates) {
-      // run query
-      Distance[] closestAddresses = GetClosestAddrs (coordinates.latitude, coordinates.longitude);
-      // return results
-      var dists = new List<Distance> ();
-      dists.AddRange (closestAddresses);
-      return dists;
+    private List<HawkerDistance> FiveClosestDistancesToCoordinates (GeocodingResponse coordinates) {
+      try {
+        HawkerDistance[] closestAddresses = FindClosestAddresses (coordinates);
+        var distances = new List<HawkerDistance> ();
+        distances.AddRange (closestAddresses);
+        return distances;
+      } catch (System.Exception ex) {
+        throw new Exception ($"An exception occurred in FiveClosestDistancesToCoordinates.  The exception text says: {ex.Message} ");
+      }
     }
 
-    private Distance[] GetClosestAddrs (double givenLatitude, double givenLongitude) {
-      // only return up to five addresses
-      Distance[] closestAddresses = new Distance[5];
-      int index = 0;
-      using (SqlConnection conn =
+    private HawkerDistance[] FindClosestAddresses (GeocodingResponse coordinates) {
+      HawkerDistance[] fiveClosestAddresses = new HawkerDistance[5];
+      int arrayIndex = 0;
+      using (SqlConnection sqlConnection =
         new SqlConnection (_context.Database.GetDbConnection ().ConnectionString)) {
-        conn.Open ();
+        sqlConnection.Open ();
+        double lat = coordinates.Results.First ().Geometry.Location.Latitude;
+        double lng = coordinates.Results.First ().Geometry.Location.Longitude;
         string closestHawkersQuery =
-          string.Format (closestHawkersTemplateQuery, givenLatitude, givenLongitude);
-        using (SqlCommand cmd = new SqlCommand (closestHawkersQuery, conn)) {
-          using (SqlDataReader dr = cmd.ExecuteReader ()) {
-            while (dr.Read () && index < 5) {
-              Distance distance = CreateDistance (dr.GetDouble (0),
-                dr.GetInt32 (1), dr.GetString (2), dr.GetString (3),
-                dr.GetDouble (4), dr.GetDouble (5));
-              closestAddresses[index++] = distance;
+          string.Format (closestHawkersTemplateQuery, lat, lng);
+        using (SqlCommand cmd = new SqlCommand (closestHawkersQuery, sqlConnection)) {
+          using (SqlDataReader dataReader = cmd.ExecuteReader ()) {
+            while (CanReadMore (arrayIndex, dataReader)) {
+              HawkerDistance distance = CreateDistance (dataReader.GetDouble (0),
+                dataReader.GetInt32 (1), dataReader.GetString (2), dataReader.GetString (3),
+                dataReader.GetDouble (4), dataReader.GetDouble (5));
+              fiveClosestAddresses[arrayIndex++] = distance;
             }
           }
         }
       }
-      return closestAddresses;
+      return fiveClosestAddresses;
     }
 
-    private static Distance CreateDistance (double dist, int id,
+    private static bool CanReadMore (int arrayIndex, SqlDataReader dataReader) {
+      return dataReader.Read () && arrayIndex < 5;
+    }
+
+    private static HawkerDistance CreateDistance (double dist, int id,
       string address, string locationName, double latitude, double longitude) {
-      return new Distance { Id = id, Name = locationName, Addr = address,
-        latitude = latitude, longitude = longitude, distance = dist};
+      return new HawkerDistance {
+        Id = id, Name = locationName, Addr = address,
+          latitude = latitude, longitude = longitude, distance = dist
+      };
     }
 
     public IActionResult Error () {

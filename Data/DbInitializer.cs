@@ -6,23 +6,14 @@ using HawkerFinder.Models;
 
 namespace HawkerFinder.Data {
   public static class DbInitializer {
-    public static void Initialize (HawkerContext context, string hawkerCentreDir, string googleApiKey) {
+    public static void Initialize (HawkerContext context, string hawkerCentreDir) {
       context.Database.EnsureCreated ();
 
       // is the hawker centre path valid?
-      if(!File.Exists(hawkerCentreDir)) {
-        Exception ex = new Exception("Command Line argument for Hawker Centres CSV is invalid.  Please check it then try again.");
+      if (!File.Exists (hawkerCentreDir)) {
+        Exception ex = new Exception ("Command Line argument for Hawker Centres CSV is invalid.  Please check it then try again.");
         throw ex;
       }
-
-      // check if google api key is valid
-      if(String.IsNullOrEmpty(googleApiKey)) {
-        Exception ex = new Exception("Command line argument for Google API key is invalid");
-        throw ex;
-      }
-
-      // assign the google API key in the context for use later
-      context.GoogleAPIKey = googleApiKey;
 
       // Look for any Addresss.
       if (context.Addresses.Any ()) {

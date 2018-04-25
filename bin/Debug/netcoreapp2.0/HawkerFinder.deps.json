@@ -1,7 +1,7 @@
 {
   "runtimeTarget": {
     "name": ".NETCoreApp,Version=v2.0",
-    "signature": "15ecfb8f5d8d1a9197c2ec73dc356cef4d01908e"
+    "signature": "cd4fcf91daab7aa38001028fab2c118b29b4fac4"
   },
   "compilationOptions": {
     "defines": [
@@ -23,6 +23,7 @@
     ".NETCoreApp,Version=v2.0": {
       "HawkerFinder/1.0.0": {
         "dependencies": {
+          "GoogleMapsApi": "0.70.0",
           "Microsoft.AspNetCore.All": "2.0.6",
           "Microsoft.NETCore.App": "2.0.0",
           "Newtonsoft.Json": "11.0.2"
@@ -32,6 +33,14 @@
         },
         "compile": {
           "HawkerFinder.dll": {}
+        }
+      },
+      "GoogleMapsApi/0.70.0": {
+        "runtime": {
+          "lib/net40/GoogleMapsApi.dll": {}
+        },
+        "compile": {
+          "lib/net40/GoogleMapsApi.dll": {}
         }
       },
       "Libuv/1.10.0": {
@@ -3910,6 +3919,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "GoogleMapsApi/0.70.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1BaddmmXAzXGlZdQauSaf8MgFOG1xNvjshLBU0+uAXyT985eSfbzVvlZtHwes9nrgKVWM4nn1yK9xYo+PHoVMw==",
+      "path": "googlemapsapi/0.70.0",
+      "hashPath": "googlemapsapi.0.70.0.nupkg.sha512"
     },
     "Libuv/1.10.0": {
       "type": "package",
