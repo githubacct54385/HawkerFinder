@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
@@ -17,15 +18,7 @@ using Microsoft.EntityFrameworkCore;
 namespace HawkerFinder.Controllers {
   public class AddressController : Controller {
     private readonly HawkerContext _context;
-
-    private const string closestHawkersTemplateQuery =
-      @"declare @mylat fLOAT, @mylong FLOAT
-        Select @mylat = {0}, @mylong = {1}
-        SELECT top 5 ABS(dbo.DictanceKM(@mylat, Address.latitude, @mylong, 
-        Address.longitude)) DistanceKm, * from Address
-        ORDER BY ABS(dbo.DictanceKM(@mylat, Address.latitude, @mylong, 
-        Address.longitude)) ";
-    public const string googleMapsAPIKey = "AIzaSyC6v5-2uaq_wusHDktM9ILcqIrlPtnZgEk";
+    private const string googleMapsAPIKey = "AIzaSyC6v5-2uaq_wusHDktM9ILcqIrlPtnZgEk";
 
     public AddressController (HawkerContext context) {
       _context = context;
@@ -78,7 +71,7 @@ namespace HawkerFinder.Controllers {
           return View (response.Address);
         }
         ViewBag.BadResponseMessage = response.responseStatus;
-        return View();
+        return View ();
       } catch (System.Exception) {
         return View ();
       }
@@ -136,28 +129,39 @@ namespace HawkerFinder.Controllers {
       }
     }
 
+    // Finds the closest Addresses by calling a server-side Stored Procedure
     private HawkerDistance[] FindClosestAddresses (GeocodingResponse coordinates) {
       HawkerDistance[] fiveClosestAddresses = new HawkerDistance[5];
       int arrayIndex = 0;
-      using (SqlConnection sqlConnection =
-        new SqlConnection (_context.Database.GetDbConnection ().ConnectionString)) {
-        sqlConnection.Open ();
+
+      using (SqlConnection conn = new SqlConnection (_context.Database.GetDbConnection ().ConnectionString)) {
+        conn.Open ();
+
+        SqlCommand cmd = new SqlCommand ("dbo.CLOSEST_HAWKERS", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+
         double lat = coordinates.Results.First ().Geometry.Location.Latitude;
         double lng = coordinates.Results.First ().Geometry.Location.Longitude;
-        string closestHawkersQuery =
-          string.Format (closestHawkersTemplateQuery, lat, lng);
-        using (SqlCommand cmd = new SqlCommand (closestHawkersQuery, sqlConnection)) {
-          using (SqlDataReader dataReader = cmd.ExecuteReader ()) {
-            while (CanReadMore (arrayIndex, dataReader)) {
-              HawkerDistance distance = CreateDistance (dataReader.GetDouble (0),
-                dataReader.GetInt32 (1), dataReader.GetString (2), dataReader.GetString (3),
-                dataReader.GetDouble (4), dataReader.GetDouble (5));
-              fiveClosestAddresses[arrayIndex++] = distance;
-            }
+        AddSQLParameter (cmd, "@Lat", lat);
+        AddSQLParameter (cmd, "@Lng", lng);
+
+        // execute the command
+        using (SqlDataReader dataReader = cmd.ExecuteReader ()) {
+          // iterate through results, printing each to console
+          while (CanReadMore (arrayIndex, dataReader)) {
+            HawkerDistance distance = CreateDistance (dataReader.GetDouble (0),
+              dataReader.GetInt32 (1), dataReader.GetString (2), dataReader.GetString (3),
+              dataReader.GetDouble (4), dataReader.GetDouble (5));
+            fiveClosestAddresses[arrayIndex++] = distance;
           }
+          return fiveClosestAddresses;
         }
       }
-      return fiveClosestAddresses;
+    }
+
+    private static void AddSQLParameter (SqlCommand cmd, string paramName, double paramValue) {
+      cmd.Parameters.Add (new SqlParameter (paramName, SqlDbType.Float));
+      cmd.Parameters[paramName].Value = paramValue;
     }
 
     private static bool CanReadMore (int arrayIndex, SqlDataReader dataReader) {
