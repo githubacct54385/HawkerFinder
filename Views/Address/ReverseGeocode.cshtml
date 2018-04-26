@@ -1,0 +1,21 @@
+@model HawkerFinder.Geocoding.GlobalAddress
+
+@{
+    ViewData["Title"] = "Reverse Geocode";
+}
+
+@{
+    if(ViewBag.BadResponseMessage != null) {
+        <h2>There was a problem with the Geocoding Request:</h2>
+        <h4>@ViewBag.BadResponseMessage</h4>
+    }
+}
+
+<h2>Your Reverse Geocode Results are below:</h2>
+<h3>You input Latitude: @ViewBag.Lat and @ViewBag.Lng</h3>
+
+@Html.DisplayFor(m => m.streetAddress)
+<br />
+@Html.DisplayFor(m => m.country)
+
+

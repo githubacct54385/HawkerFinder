@@ -2,62 +2,48 @@
     ViewData["Title"] = "Index";
 }
 
-<!--<script>
-  var geocoder;
-  function initialize() {
-    geocoder = new google.maps.Geocoder();
-  }
-
-  function codeAddress() {
-    var address = document.getElementById('address').value;
-    geocoder.geocode( { 'address': address}, function(results, status) {
-      if (status == 'OK') {
-        postToServer(results[0].geometry.location);
-      } else {
-        alert('Geocode was not successful for the following reason: ' + status);
-      }
-    });
-  }
-
-  function postToServer(coordinates) {
-    var xhttp = new XMLHttpRequest();
-    xhttp.onreadystatechange = function() {
-    if (this.readyState == 4 && this.status == 200) {
-      document.getElementById("demo").innerHTML = this.responseText;
-    }
-  };
-    xhttp.open("POST", "/Address/CloseHawkers", true);
-    xhttp.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    var params = new String("givenCoordinates=");
-    params = params.concat(coordinates);
-    xhttp.send(params);
-  }
-</script>-->
-
 <div class="jumbotron jumbotron-fluid jumbo-bg" >
-  <div class="bg-img"></div>
-  <div class="container">
-    <h1 class="display-4">Hungry? Find closest Hawkers</h1>
-    <p class="lead">Simply input your location</p>
-  </div>
-
-  <div class="container">
-    <form action="/Address/CloseHawkersAsync" method="POST">
-      <div class="form-row">
-        <div class="col-sm-12">
-          <label for="address">Address</label>
-          <input class="form-control" type="text" name="address" placeholder="Raffles Place" >
-        </div>
-      <div class="form-row">
-        <div class="col-sm-2">
-          <input type="submit" class="form-control btn btn-primary" value="Submit">
-        </div>
-      </div>
-    </form>
-  </div>
-  <!--<div>
-    <p id="demo"></p>
-  </div>-->
+    <div class="bg-img"></div>
+    <div class="container">
+        <h1 class="display-4">Hungry? Find closest Hawkers</h1>
+        <p class="lead">Simply input your location</p>
+    </div>
+    <div class="container">
+        <form action="/Address/CloseHawkersAsync" method="POST">
+            <div class="form-row">
+                <div class="col-sm-12">
+                    <label for="address">Address</label>
+                    <input class="form-control" type="text" name="address" placeholder="Raffles Place" >
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="col-sm-2">
+                    <input class="form-control btn btn-primary" type="submit" value="Submit">
+                </div>
+            </div>
+        </form>
+    </div>
+    <br />
+    <br />
+    <div class="container">
+        <form action="/Address/ReverseGeocode" method="POST">
+            <div class="form-row">
+                <div class="col-sm-6">
+                    <label for="rvgLat">Latitude</label>
+                    <input class="form-control" type="text" name="rvgLat" placeholder="1.30" >
+                </div>
+                <div class="col-sm-6">
+                    <label for="rvgLng">Longitude</label>
+                    <input class="form-control" type="text" name="rvgLng" placeholder="103.00" >
+                </div>
+            </div>
+            <div class="form-row">               
+                <div class="col-sm-2">
+                    <input class="form-control btn btn-primary" type="submit" value="Submit">
+                </div>
+            </div>
+        </form>
+    </div>
 </div>
 
   

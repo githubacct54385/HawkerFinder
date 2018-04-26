@@ -1,4 +1,4 @@
-@model IEnumerable<HawkerFinder.Models.HawkerDistance>
+@*@model IEnumerable<HawkerFinder.Models.HawkerDistance>*@
 
 @{
     ViewData["Title"] = "Close Hawkers";
@@ -7,9 +7,11 @@
 <h2>Checkout these nearby places to eat</h2>
 
 @{
-    if(ViewBag.Exception != null) {
+    if(ViewBag.BadResponseMessage != null) {
         <h2>There was an error on the server:</h2>
         <h4>@ViewBag.Exception</h4>
+    } else {
+        <h2>Here are the five closest hawker centres to @ViewBag.SearchAddress</h2>
     }
 }
 
@@ -27,13 +29,26 @@
             };
             var infoWindow = new google.maps.InfoWindow();
             var map = new google.maps.Map(document.getElementById("Map"), mapOptions);
+            
+            // Origins, anchor positions and coordinates of the marker increase in the X
+            // direction to the right and in the Y direction down.
+            var image = {
+                url: 'https://www.shareicon.net/data/32x32/2016/04/26/755677_food_512x512.png',
+                // This marker is 32 pixels wide by 32 pixels high.
+                size: new google.maps.Size(32, 32),
+                // The origin for this image is (0, 0).
+                origin: new google.maps.Point(0, 0),
+                // The anchor for this image is the base of the strawberry at (0, 32).
+                anchor: new google.maps.Point(0, 32)
+            };
             for (i = 0; i < markers.length; i++) {
                 var data = markers[i]
                 var myLatlng = new google.maps.LatLng(data.lat, data.lng);
                 var marker = new google.maps.Marker({
                     position: myLatlng,
                     map: map,
-                    title: data.title
+                    title: data.title,
+                    icon: image
                 });
                 (function (marker, data) {
                     google.maps.event.addListener(marker, "click", function (e) {

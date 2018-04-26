@@ -3,11 +3,13 @@ using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using GoogleMapsApi;
 using GoogleMapsApi.Entities.Geocoding.Request;
 using GoogleMapsApi.Entities.Geocoding.Response;
 using HawkerFinder.Data;
+using HawkerFinder.Geocoding;
 using HawkerFinder.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +25,7 @@ namespace HawkerFinder.Controllers {
         Address.longitude)) DistanceKm, * from Address
         ORDER BY ABS(dbo.DictanceKM(@mylat, Address.latitude, @mylong, 
         Address.longitude)) ";
-    private const string googleMapsAPIKey = "AIzaSyC6v5-2uaq_wusHDktM9ILcqIrlPtnZgEk";
+    public const string googleMapsAPIKey = "AIzaSyC6v5-2uaq_wusHDktM9ILcqIrlPtnZgEk";
 
     public AddressController (HawkerContext context) {
       _context = context;
@@ -39,7 +41,7 @@ namespace HawkerFinder.Controllers {
       return View (await _context.Addresses.ToListAsync ());
     }
 
-    // returns some of the closest hawker centres to a given coordinate
+    // returns five of the closest hawker centres to a given coordinate
     [HttpPost]
     public IActionResult CloseHawkersAsync (string address) {
       List<HawkerDistance> distances = new List<HawkerDistance> ();
@@ -54,6 +56,7 @@ namespace HawkerFinder.Controllers {
           return RedirectToAction ("Index");
         }
         ViewBag.Markers = mapsMarkers;
+        ViewBag.SearchAddress = address;
         return View ("closehawkers");
       } catch (System.Exception ex) {
         Console.WriteLine ("An exception occurred in AddressController/CloseHawkers");
@@ -61,6 +64,25 @@ namespace HawkerFinder.Controllers {
         ViewBag.Exception = ex.Message;
         return View ("closehawkers");
       }
+    }
+
+    [HttpPost]
+    public IActionResult ReverseGeocode (string rvgLat, string rvgLng) {
+      try {
+        ReverseGeocodingRequest request = new ReverseGeocodingRequest (rvgLat, rvgLng);
+        ReverseGeocodingResponse response = new ReverseGeocodingResponse (request, googleMapsAPIKey);
+        bool responseIsOK = response.responseStatus == HttpStatusCode.OK;
+        if (responseIsOK) {
+          ViewBag.Lat = rvgLat;
+          ViewBag.Lng = rvgLng;
+          return View (response.Address);
+        }
+        ViewBag.BadResponseMessage = response.responseStatus;
+        return View();
+      } catch (System.Exception) {
+        return View ();
+      }
+
     }
 
     private static void CheckForCoordinatesErrors (GeocodingResponse coordinates) {
@@ -75,7 +97,6 @@ namespace HawkerFinder.Controllers {
     }
 
     private static GeocodingResponse GeocodeAddress (string address) {
-
       var geocodingRequest = new GeocodingRequest {
         ApiKey = googleMapsAPIKey,
         Address = address
